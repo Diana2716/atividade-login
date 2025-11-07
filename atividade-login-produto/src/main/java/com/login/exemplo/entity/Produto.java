@@ -1,66 +1,61 @@
 package com.login.exemplo.entity;
 
-import java.util.Optional;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+
 @Entity
 @Table(name = "tb_produto")
 public class Produto {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
-	private String nome;
-	private double preco;
-	private int quantidade;
-	
-	public Produto() {
-		
-	}
-	
-	public Produto(String nome, double preco, int quantidade) {
-		this.nome = nome;
-		this.preco = preco;
-		this.quantidade = quantidade;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    private String nome;
+    private double preco;
+    private int quantidade;
 
-	public int getId() {
-		return id;
-	}
+    public Produto() {
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public Produto(String nome, double preco, int quantidade) {
+        this.nome = nome;
+        this.preco = preco;
+        this.quantidade = quantidade;
+    }
 
-	public String getNome() {
-		return nome;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public double getPreco() {
-		return preco;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public void setPreco(double preco) {
-		this.preco = preco;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public int getQuantidade() {
-		return quantidade;
-	}
+    public double getPreco() {
+        return preco;
+    }
 
-	public void setQuantidade(int quantidade) {
-		this.quantidade = quantidade;
-	}
+    public void setPreco(double preco) {
+        this.preco = preco;
+    }
 
-	
-	
+    public int getQuantidade() {
+        return quantidade;
+    }
+
+    public void setQuantidade(int quantidade) {
+        this.quantidade = quantidade;
+    }
 }
