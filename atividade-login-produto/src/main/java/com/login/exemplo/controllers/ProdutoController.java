@@ -2,60 +2,74 @@ package com.login.exemplo.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.login.exemplo.dto.ProdutoRequestDTO;
+import com.login.exemplo.dto.ProdutoResponseDTO;
 import com.login.exemplo.entity.Produto;
 import com.login.exemplo.repository.ProdutoRepository;
 
+
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("produtos")
+@RequestMapping("/produtos")
 public class ProdutoController {
 
     @Autowired
     private ProdutoRepository produtoRepository;
 
-    // 1️⃣ GET por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getProdutoById(@PathVariable int id) {
-        Optional<Produto> produto = produtoRepository.findById(id);
-        return produto.isPresent() ? ResponseEntity.ok(produto.get()) : ResponseEntity.notFound().build();
-    }
-
-    // 2️⃣ GET All
     @GetMapping
-    public ResponseEntity<List<Produto>> getAllProdutos() {
-        List<Produto> produtos = produtoRepository.findAll();
+    public ResponseEntity<List<ProdutoResponseDTO>> getAllProdutos() {
+        List<ProdutoResponseDTO> produtos = produtoRepository.findAll()
+                .stream()
+                .map(ProdutoResponseDTO::new)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(produtos);
     }
 
-    // 3️⃣ POST (criar produto)
-    @PostMapping
-    public ResponseEntity<Produto> createProduto(@RequestBody Produto produto) {
-        Produto novoProduto = produtoRepository.save(produto);
-        return ResponseEntity.ok(novoProduto);
+    @GetMapping("/id")
+    public ResponseEntity<?> getProdutoById(@PathVariable int id) {
+        Optional<Produto> produto = produtoRepository.findById(id);
+        return produto.map(value -> ResponseEntity.ok(new ProdutoResponseDTO(value)))
+                      .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // 4️⃣ PUT (atualizar apenas a quantidade)
+    @PostMapping
+    public ResponseEntity<ProdutoResponseDTO> createProduto(@RequestBody ProdutoRequestDTO dto) {
+        Produto produto = new Produto(dto.getNome(), dto.getPreco(), dto.getQuantidade());
+        Produto salvo = produtoRepository.save(produto);
+        return ResponseEntity.ok(new ProdutoResponseDTO(salvo));
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateQuantidade(@PathVariable int id, @RequestBody Produto produtoAtualizado) {
-        Optional<Produto> produtoOptional = produtoRepository.findById(id);
-        if (produtoOptional.isPresent()) {
-            Produto produto = produtoOptional.get();
-            produto.setQuantidade(produtoAtualizado.getQuantidade());
+    public ResponseEntity<?> updateProduto(@PathVariable int id, @RequestBody ProdutoRequestDTO dto) {
+        Optional<Produto> existente = produtoRepository.findById(id);
+        if (existente.isPresent()) {
+            Produto produto = existente.get();
+            produto.setNome(dto.getNome());
+            produto.setPreco(dto.getPreco());
+            produto.setQuantidade(dto.getQuantidade());
             produtoRepository.save(produto);
-            return ResponseEntity.ok(produto);
+            return ResponseEntity.ok(new ProdutoResponseDTO(produto));
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    // 5️⃣ DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduto(@PathVariable int id) {
+    public ResponseEntity<String> deleteProduto(@PathVariable int id) {
         if (produtoRepository.existsById(id)) {
             produtoRepository.deleteById(id);
             return ResponseEntity.ok("Produto deletado com sucesso!");
